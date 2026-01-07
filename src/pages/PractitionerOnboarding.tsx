@@ -294,7 +294,7 @@ const PractitionerOnboarding = () => {
   };
 
   const completeOnboarding = async () => {
-    if (!practitionerId) return;
+    if (!practitionerId || !user) return;
     
     setIsSaving(true);
     try {
@@ -319,6 +319,27 @@ const PractitionerOnboarding = () => {
         .eq('id', practitionerId);
 
       if (practitionerError) throw practitionerError;
+
+      // Sync personal data to the profiles table so practitioner doesn't have to re-enter it
+      const { error: userProfileError } = await supabase
+        .from('profiles')
+        .update({
+          phone: formData.phone || null,
+          date_of_birth: formData.dateOfBirth || null,
+          id_number: formData.idNumber || null,
+          address: formData.address || null,
+          city: formData.city || null,
+          province: formData.province || null,
+          postal_code: formData.postalCode || null,
+          emergency_contact_name: formData.emergencyContactName || null,
+          emergency_contact_phone: formData.emergencyContactPhone || null,
+        })
+        .eq('user_id', user.id);
+
+      if (userProfileError) {
+        console.error('Error syncing to profiles:', userProfileError);
+        // Don't fail the whole process for this
+      }
 
       // Update invitation status if token exists
       const token = searchParams.get('token');
