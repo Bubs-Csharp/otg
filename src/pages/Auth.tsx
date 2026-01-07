@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,10 @@ const Auth = () => {
   const { isAdmin, isPractitioner, loading: rolesLoading } = useUserRole();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Check for redirect parameter (used for practitioner onboarding)
+  const redirectTo = searchParams.get('redirect');
 
   // Role-based redirect after login
   useEffect(() => {
@@ -37,6 +41,12 @@ const Auth = () => {
     if (user && !rolesLoading) {
       // Small delay to ensure roles are properly fetched
       const timer = setTimeout(() => {
+        // If there's a redirect parameter, use that instead of role-based redirect
+        if (redirectTo) {
+          navigate(redirectTo);
+          return;
+        }
+        
         if (isAdmin) {
           navigate('/admin');
         } else if (isPractitioner) {
@@ -47,7 +57,7 @@ const Auth = () => {
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [user, isAdmin, isPractitioner, rolesLoading, navigate]);
+  }, [user, isAdmin, isPractitioner, rolesLoading, navigate, redirectTo]);
 
   const validateForm = (type: 'login' | 'signup' | 'forgot') => {
     const newErrors: Record<string, string> = {};
