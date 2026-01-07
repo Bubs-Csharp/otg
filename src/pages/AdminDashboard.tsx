@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { AdminManagement } from '@/components/admin/AdminManagement';
 import { 
   Calendar, 
   DollarSign, 
@@ -29,7 +30,8 @@ import {
   UserCog,
   Mail,
   Loader2,
-  Send
+  Send,
+  Shield
 } from 'lucide-react';
 import { format, parseISO, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 
@@ -482,6 +484,10 @@ const AdminDashboard = () => {
               <TabsTrigger value="practitioners">Practitioners</TabsTrigger>
               <TabsTrigger value="services">Services</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="admins">
+                <Shield className="w-4 h-4 mr-1" />
+                Admins
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="bookings">
@@ -886,6 +892,10 @@ const AdminDashboard = () => {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            <TabsContent value="admins">
+              <AdminManagement />
             </TabsContent>
           </Tabs>
         </div>
