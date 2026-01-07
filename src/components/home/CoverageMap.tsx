@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Check } from "lucide-react";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/animated-section";
+import SouthAfricaMap from "@/assets/images/south-africa-map.svg";
 
 const provinces = [
   { name: "Gauteng", active: true, cities: ["Johannesburg", "Pretoria", "Centurion"] },
@@ -13,18 +14,6 @@ const provinces = [
   { name: "Free State", active: true, cities: ["Bloemfontein", "Welkom"] },
   { name: "North West", active: true, cities: ["Rustenburg", "Potchefstroom"] },
   { name: "Northern Cape", active: true, cities: ["Kimberley", "Upington"] },
-];
-
-const provincePositions = [
-  { x: 200, y: 140, name: "Gauteng" },
-  { x: 100, y: 280, name: "Western Cape" },
-  { x: 280, y: 200, name: "KZN" },
-  { x: 180, y: 260, name: "Eastern Cape" },
-  { x: 240, y: 120, name: "Mpumalanga" },
-  { x: 200, y: 90, name: "Limpopo" },
-  { x: 150, y: 200, name: "Free State" },
-  { x: 140, y: 140, name: "North West" },
-  { x: 100, y: 200, name: "Northern Cape" },
 ];
 
 export function CoverageMap() {
@@ -45,49 +34,50 @@ export function CoverageMap() {
           {/* Map Visualization */}
           <AnimatedSection animation="scale-in" delay={100}>
             <Card className="border-0 shadow-soft bg-card overflow-hidden">
-              <CardContent className="p-0">
-                <div className="relative aspect-[4/3] bg-gradient-to-br from-soft-teal/30 to-accent flex items-center justify-center">
-                  {/* Simplified SA Map Shape */}
-                  <svg viewBox="0 0 400 350" className="w-full h-full p-8">
-                    {/* South Africa simplified outline */}
-                    <path
-                      d="M80 120 L120 80 L200 60 L280 70 L340 100 L360 160 L350 220 L320 280 L260 320 L180 330 L120 310 L80 260 L60 200 L70 160 Z"
-                      className="fill-primary/20 stroke-primary stroke-2"
-                    />
-                    {/* Province dots */}
-                    {provincePositions.map((province, i) => (
-                      <g key={i}>
-                        {/* Pulse ring */}
-                        <circle
-                          cx={province.x}
-                          cy={province.y}
-                          r="12"
-                          className="fill-coral/50 animate-pulse-ring"
-                          style={{ animationDelay: `${i * 0.2}s` }}
-                        />
-                        {/* Main dot */}
-                        <circle
-                          cx={province.x}
-                          cy={province.y}
-                          r="8"
-                          className="fill-coral"
-                        />
-                        {/* Inner dot */}
-                        <circle
-                          cx={province.x}
-                          cy={province.y}
-                          r="4"
-                          className="fill-primary-foreground"
-                        />
-                      </g>
-                    ))}
-                  </svg>
-                  <div className="absolute bottom-4 left-4 right-4 text-center">
-                    <p className="text-sm text-primary font-medium">
-                      <MapPin className="inline h-4 w-4 mr-1" />
-                      All 9 provinces covered
-                    </p>
+              <CardContent className="p-6">
+                <div className="relative aspect-square flex items-center justify-center">
+                  <img 
+                    src={SouthAfricaMap} 
+                    alt="South Africa coverage map showing all 9 provinces" 
+                    className="w-full h-full object-contain [&_path]:fill-primary/60 [&_path]:stroke-background [&_path]:hover:fill-primary [&_path]:transition-colors"
+                    style={{
+                      filter: 'hue-rotate(140deg) saturate(0.8)'
+                    }}
+                  />
+                  {/* Pulsing indicators for major cities */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {/* Gauteng - Johannesburg */}
+                    <div className="absolute top-[35%] left-[58%] w-4 h-4">
+                      <span className="absolute inset-0 rounded-full bg-coral animate-ping opacity-75"></span>
+                      <span className="relative block w-4 h-4 rounded-full bg-coral"></span>
+                    </div>
+                    {/* Western Cape - Cape Town */}
+                    <div className="absolute top-[75%] left-[22%] w-4 h-4">
+                      <span className="absolute inset-0 rounded-full bg-coral animate-ping opacity-75" style={{ animationDelay: '0.2s' }}></span>
+                      <span className="relative block w-4 h-4 rounded-full bg-coral"></span>
+                    </div>
+                    {/* KZN - Durban */}
+                    <div className="absolute top-[55%] left-[72%] w-4 h-4">
+                      <span className="absolute inset-0 rounded-full bg-coral animate-ping opacity-75" style={{ animationDelay: '0.4s' }}></span>
+                      <span className="relative block w-4 h-4 rounded-full bg-coral"></span>
+                    </div>
+                    {/* Limpopo */}
+                    <div className="absolute top-[18%] left-[60%] w-3 h-3">
+                      <span className="absolute inset-0 rounded-full bg-coral/80 animate-ping opacity-75" style={{ animationDelay: '0.6s' }}></span>
+                      <span className="relative block w-3 h-3 rounded-full bg-coral/80"></span>
+                    </div>
+                    {/* Mpumalanga */}
+                    <div className="absolute top-[30%] left-[70%] w-3 h-3">
+                      <span className="absolute inset-0 rounded-full bg-coral/80 animate-ping opacity-75" style={{ animationDelay: '0.8s' }}></span>
+                      <span className="relative block w-3 h-3 rounded-full bg-coral/80"></span>
+                    </div>
                   </div>
+                </div>
+                <div className="text-center mt-4">
+                  <p className="text-sm text-primary font-medium">
+                    <MapPin className="inline h-4 w-4 mr-1" />
+                    All 9 provinces covered
+                  </p>
                 </div>
               </CardContent>
             </Card>
