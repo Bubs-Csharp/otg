@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,14 +27,22 @@ const Auth = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { signIn, signUp, resetPassword, user } = useAuth();
+  const { isAdmin, isPractitioner, loading: rolesLoading } = useUserRole();
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Role-based redirect after login
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
+    if (user && !rolesLoading) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else if (isPractitioner) {
+        navigate('/practitioner');
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [user, navigate]);
+  }, [user, isAdmin, isPractitioner, rolesLoading, navigate]);
 
   const validateForm = (type: 'login' | 'signup' | 'forgot') => {
     const newErrors: Record<string, string> = {};
