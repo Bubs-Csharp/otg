@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,9 +22,10 @@ import {
   User, 
   Users,
   Check,
-  CreditCard
+  CreditCard,
+  Loader2
 } from 'lucide-react';
-import { format, addDays, isBefore, startOfToday } from 'date-fns';
+import { format, isBefore, startOfToday } from 'date-fns';
 
 interface Service {
   id: string;
@@ -59,7 +60,7 @@ const steps = [
   { id: 1, name: 'Service', icon: Check },
   { id: 2, name: 'Date & Time', icon: CalendarIcon },
   { id: 3, name: 'Details', icon: User },
-  { id: 4, name: 'Confirm', icon: CreditCard },
+  { id: 4, name: 'Payment', icon: CreditCard },
 ];
 
 const Book = () => {
@@ -74,6 +75,7 @@ const Book = () => {
   const [practitioners, setPractitioners] = useState<Practitioner[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'online' | 'on-arrival'>('online');
 
   // Booking state
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -149,7 +151,8 @@ const Book = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from('bookings').insert({
+      // Create the booking first
+      const { data: booking, error: bookingError } = await supabase.from('bookings').insert({
         user_id: user.id,
         service_id: selectedService.id,
         location_id: selectedLocation?.id || null,
@@ -159,17 +162,55 @@ const Book = () => {
         group_size: groupSize,
         special_notes: specialNotes || null,
         total_amount: totalAmount,
-        status: 'confirmed',
-        payment_status: 'pending',
-      });
+        status: 'pending',
+        payment_status: paymentMethod === 'online' ? 'pending' : 'pay-on-arrival',
+      }).select().single();
 
-      if (error) throw error;
+      if (bookingError) throw bookingError;
 
-      toast({
-        title: 'Booking Confirmed!',
-        description: `Your appointment for ${selectedService.name} has been booked.`,
-      });
-      navigate('/dashboard');
+      if (paymentMethod === 'online') {
+        // Create Yoco checkout session
+        const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-yoco-checkout', {
+          body: {
+            booking_id: booking.id,
+            amount: totalAmount,
+            currency: 'ZAR',
+            success_url: `${window.location.origin}/payment-success?booking_id=${booking.id}`,
+            cancel_url: `${window.location.origin}/payment-cancelled?booking_id=${booking.id}`,
+            metadata: {
+              service_name: selectedService.name,
+            },
+          },
+        });
+
+        if (checkoutError) {
+          console.error('Checkout error:', checkoutError);
+          // Update booking to confirmed even if payment fails
+          await supabase.from('bookings').update({ status: 'confirmed' }).eq('id', booking.id);
+          toast({
+            title: 'Booking Confirmed',
+            description: 'Your booking is confirmed. Payment can be completed later or on arrival.',
+          });
+          navigate('/dashboard');
+          return;
+        }
+
+        // Redirect to Yoco checkout
+        if (checkoutData?.redirect_url) {
+          window.location.href = checkoutData.redirect_url;
+        } else {
+          throw new Error('No checkout URL received');
+        }
+      } else {
+        // Pay on arrival - just confirm the booking
+        await supabase.from('bookings').update({ status: 'confirmed' }).eq('id', booking.id);
+        
+        toast({
+          title: 'Booking Confirmed!',
+          description: `Your appointment for ${selectedService.name} has been booked. Payment will be collected on arrival.`,
+        });
+        navigate('/dashboard');
+      }
     } catch (error) {
       console.error('Booking error:', error);
       toast({
@@ -451,12 +492,12 @@ const Book = () => {
                 </div>
               )}
 
-              {/* Step 4: Confirmation */}
+              {/* Step 4: Payment */}
               {currentStep === 4 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-semibold text-foreground mb-2">Confirm Your Booking</h2>
-                    <p className="text-muted-foreground">Review your appointment details</p>
+                    <h2 className="text-xl font-semibold text-foreground mb-2">Confirm & Pay</h2>
+                    <p className="text-muted-foreground">Review your appointment and choose payment method</p>
                   </div>
 
                   <Card className="bg-muted/50">
@@ -530,12 +571,69 @@ const Book = () => {
                           </p>
                           <p className="text-2xl font-bold text-primary">R{totalAmount.toFixed(2)}</p>
                         </div>
-                        <Badge variant="secondary" className="text-sm">
-                          Payment on arrival
-                        </Badge>
                       </div>
                     </CardContent>
                   </Card>
+
+                  {/* Payment Method Selection */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Payment Method</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Card 
+                        className={cn(
+                          "cursor-pointer transition-all",
+                          paymentMethod === 'online' 
+                            ? "ring-2 ring-primary bg-primary/5" 
+                            : "hover:bg-muted/50"
+                        )}
+                        onClick={() => setPaymentMethod('online')}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className={cn(
+                              "w-10 h-10 rounded-full flex items-center justify-center",
+                              paymentMethod === 'online' ? "bg-primary text-primary-foreground" : "bg-muted"
+                            )}>
+                              <CreditCard className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-foreground">Pay Online Now</h4>
+                              <p className="text-sm text-muted-foreground">
+                                Secure payment via Card or EFT
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card 
+                        className={cn(
+                          "cursor-pointer transition-all",
+                          paymentMethod === 'on-arrival' 
+                            ? "ring-2 ring-primary bg-primary/5" 
+                            : "hover:bg-muted/50"
+                        )}
+                        onClick={() => setPaymentMethod('on-arrival')}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className={cn(
+                              "w-10 h-10 rounded-full flex items-center justify-center",
+                              paymentMethod === 'on-arrival' ? "bg-primary text-primary-foreground" : "bg-muted"
+                            )}>
+                              <MapPin className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-foreground">Pay on Arrival</h4>
+                              <p className="text-sm text-muted-foreground">
+                                Pay at the location when you arrive
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -565,8 +663,22 @@ const Book = () => {
                 onClick={handleSubmit}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Processing...' : 'Confirm Booking'}
-                <Check className="w-4 h-4 ml-2" />
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : paymentMethod === 'online' ? (
+                  <>
+                    Proceed to Payment
+                    <CreditCard className="w-4 h-4 ml-2" />
+                  </>
+                ) : (
+                  <>
+                    Confirm Booking
+                    <Check className="w-4 h-4 ml-2" />
+                  </>
+                )}
               </Button>
             )}
           </div>
