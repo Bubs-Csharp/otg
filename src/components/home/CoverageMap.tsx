@@ -15,16 +15,17 @@ const provinces = [
   { name: "Northern Cape", active: true, cities: ["Kimberley", "Upington"] },
 ];
 
+// Accurate positions based on South Africa's geography
 const provincePositions = [
-  { x: 200, y: 140, name: "Gauteng" },
-  { x: 100, y: 280, name: "Western Cape" },
-  { x: 280, y: 200, name: "KZN" },
-  { x: 180, y: 260, name: "Eastern Cape" },
-  { x: 240, y: 120, name: "Mpumalanga" },
-  { x: 200, y: 90, name: "Limpopo" },
-  { x: 150, y: 200, name: "Free State" },
-  { x: 140, y: 140, name: "North West" },
-  { x: 100, y: 200, name: "Northern Cape" },
+  { x: 280, y: 145, name: "Gauteng" },
+  { x: 95, y: 310, name: "Western Cape" },
+  { x: 355, y: 210, name: "KZN" },
+  { x: 255, y: 285, name: "Eastern Cape" },
+  { x: 330, y: 120, name: "Mpumalanga" },
+  { x: 295, y: 65, name: "Limpopo" },
+  { x: 235, y: 205, name: "Free State" },
+  { x: 210, y: 115, name: "North West" },
+  { x: 120, y: 195, name: "Northern Cape" },
 ];
 
 export function CoverageMap() {
@@ -48,12 +49,22 @@ export function CoverageMap() {
               <CardContent className="p-0">
                 <div className="relative aspect-[4/3] bg-gradient-to-br from-soft-teal/30 to-accent flex items-center justify-center">
                   {/* Simplified SA Map Shape */}
-                  <svg viewBox="0 0 400 350" className="w-full h-full p-8">
-                    {/* South Africa simplified outline */}
+                  <svg viewBox="0 0 420 380" className="w-full h-full p-6">
+                    {/* Accurate South Africa outline with provinces */}
+                    {/* Main country outline */}
                     <path
-                      d="M80 120 L120 80 L200 60 L280 70 L340 100 L360 160 L350 220 L320 280 L260 320 L180 330 L120 310 L80 260 L60 200 L70 160 Z"
-                      className="fill-primary/20 stroke-primary stroke-2"
+                      d="M55 310 Q60 295 70 285 L85 270 Q95 260 100 250 L110 235 Q115 225 120 215 L130 200 Q135 190 140 180 L150 165 Q155 155 165 145 L180 130 Q190 120 205 110 L225 100 Q245 90 265 85 L290 80 Q310 78 330 82 L350 88 Q365 95 375 108 L385 125 Q390 140 388 155 L385 175 Q380 190 370 205 L355 225 Q345 238 340 250 L335 265 Q332 275 335 285 L340 300 Q345 315 340 330 L330 345 Q315 355 295 360 L270 362 Q250 360 230 355 L205 345 Q185 335 170 325 L150 310 Q130 295 110 290 L85 290 Q70 295 60 305 Z"
+                      className="fill-primary/15 stroke-primary stroke-2"
                     />
+                    {/* Lesotho (enclave) */}
+                    <ellipse cx="295" cy="255" rx="18" ry="15" className="fill-muted stroke-primary stroke-1" />
+                    {/* Province boundaries - simplified */}
+                    <path d="M205 110 L235 175 L280 190 L330 160" className="stroke-primary/40 stroke-1 fill-none" />
+                    <path d="M165 145 L195 165 L235 175" className="stroke-primary/40 stroke-1 fill-none" />
+                    <path d="M195 165 L180 220 L205 270" className="stroke-primary/40 stroke-1 fill-none" />
+                    <path d="M235 175 L240 230 L295 235" className="stroke-primary/40 stroke-1 fill-none" />
+                    <path d="M110 235 L180 220" className="stroke-primary/40 stroke-1 fill-none" />
+                    <path d="M180 220 L205 270 L270 280" className="stroke-primary/40 stroke-1 fill-none" />
                     {/* Province dots */}
                     {provincePositions.map((province, i) => (
                       <g key={i}>
