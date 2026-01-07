@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Phone, Heart, User, LogOut, Calendar, Settings } from "lucide-react";
+import { Menu, X, Phone, Heart, User, LogOut, Calendar, Settings, Shield, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +26,7 @@ export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { isAdmin, isPractitioner } = useUserRole();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -91,10 +93,26 @@ export function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
+                        <Shield className="h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isPractitioner && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/practitioner" className="flex items-center gap-2 cursor-pointer">
+                        <Stethoscope className="h-4 w-4" />
+                        Practitioner Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
                       <Calendar className="h-4 w-4" />
-                      Dashboard
+                      My Bookings
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -172,13 +190,33 @@ export function Header() {
             
             {user ? (
               <>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Admin Dashboard
+                  </Link>
+                )}
+                {isPractitioner && (
+                  <Link
+                    to="/practitioner"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    <Stethoscope className="h-4 w-4" />
+                    Practitioner Dashboard
+                  </Link>
+                )}
                 <Link
                   to="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
                   <Calendar className="h-4 w-4" />
-                  Dashboard
+                  My Bookings
                 </Link>
                 <Link
                   to="/profile"
