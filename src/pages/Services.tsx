@@ -3,6 +3,7 @@ import { Layout } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AnimatedSection } from "@/components/ui/animated-section";
 import { 
   Stethoscope, 
   Activity, 
@@ -22,6 +23,10 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+
+// Images
+import corporateWellnessImage from "@/assets/images/corporate-wellness.jpg";
+import medicalEquipmentImage from "@/assets/images/medical-equipment.jpg";
 
 const categories = [
   { id: "all", name: "All Services" },
@@ -152,9 +157,19 @@ const Services = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative py-16 lg:py-24 gradient-soft">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
+      <section className="relative py-16 lg:py-24 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img 
+            src={medicalEquipmentImage} 
+            alt="" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/60" />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <AnimatedSection animation="fade-up" className="max-w-3xl">
             <Badge variant="secondary" className="mb-4">Our Services</Badge>
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6">
               Comprehensive Healthcare Solutions
@@ -163,7 +178,7 @@ const Services = () => {
               From individual wellness checks to enterprise-wide health programs, 
               we deliver professional medical services tailored to your needs.
             </p>
-          </div>
+          </AnimatedSection>
         </div>
       </section>
 
@@ -171,15 +186,16 @@ const Services = () => {
       <section className="py-8 bg-background border-b border-border sticky top-16 z-40">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap gap-2 justify-center">
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <Button
                 key={category.id}
                 variant={activeCategory === category.id ? "default" : "outline"}
                 className={cn(
-                  "rounded-full",
-                  activeCategory === category.id && "shadow-warm"
+                  "rounded-full transition-all duration-300",
+                  activeCategory === category.id && "shadow-warm scale-105"
                 )}
                 onClick={() => setActiveCategory(category.id)}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
                 {category.name}
               </Button>
@@ -193,52 +209,55 @@ const Services = () => {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredServices.map((service, index) => (
-              <Card 
-                key={index} 
-                className="border-0 shadow-soft bg-card hover-lift group"
+              <AnimatedSection 
+                key={`${activeCategory}-${index}`} 
+                animation="fade-up" 
+                delay={index * 75}
               >
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-14 h-14 rounded-xl bg-coral-light flex items-center justify-center flex-shrink-0 group-hover:bg-coral/20 transition-colors">
-                      <service.icon className="h-7 w-7 text-coral" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-display font-semibold text-lg text-foreground mb-1">
-                        {service.title}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-3.5 w-3.5" />
-                        {service.duration}
+                <Card className="border-0 shadow-soft bg-card hover-lift group h-full">
+                  <CardContent className="p-6 flex flex-col h-full">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-14 h-14 rounded-xl bg-coral-light flex items-center justify-center flex-shrink-0 group-hover:bg-coral/20 group-hover:scale-110 transition-all duration-300">
+                        <service.icon className="h-7 w-7 text-coral" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-display font-semibold text-lg text-foreground mb-1">
+                          {service.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-3.5 w-3.5" />
+                          {service.duration}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {service.description}
-                  </p>
+                    
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {service.description}
+                    </p>
 
-                  <div className="space-y-2 mb-6">
-                    {service.features.map((feature, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm">
-                        <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-foreground">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
+                    <div className="space-y-2 mb-6 flex-grow">
+                      {service.features.map((feature, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm">
+                          <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                          <span className="text-foreground">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-border">
-                    <span className="font-display font-bold text-xl text-primary">
-                      {service.price}
-                    </span>
-                    <Button asChild className="rounded-full group-hover:shadow-warm transition-shadow">
-                      <Link to="/contact">
-                        Book Now
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="flex items-center justify-between pt-4 border-t border-border mt-auto">
+                      <span className="font-display font-bold text-xl text-primary">
+                        {service.price}
+                      </span>
+                      <Button asChild className="rounded-full group-hover:shadow-warm transition-shadow">
+                        <Link to="/contact">
+                          Book Now
+                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </AnimatedSection>
             ))}
           </div>
         </div>
@@ -247,43 +266,52 @@ const Services = () => {
       {/* Corporate CTA */}
       <section className="py-16 lg:py-24 bg-muted/30">
         <div className="container mx-auto px-4">
-          <Card className="border-0 shadow-warm bg-card overflow-hidden">
-            <CardContent className="p-0">
-              <div className="grid lg:grid-cols-2">
-                <div className="p-8 lg:p-12">
-                  <Badge variant="secondary" className="mb-4">Corporate Solutions</Badge>
-                  <h2 className="font-display text-3xl font-bold text-foreground mb-4">
-                    Tailored Health Programs for Your Business
-                  </h2>
-                  <p className="text-muted-foreground mb-6">
-                    We work with companies of all sizes to create customized health and wellness programs. 
-                    From mining sites to corporate offices, we bring healthcare to your workplace.
-                  </p>
-                  <ul className="space-y-3 mb-8">
-                    {["Flexible scheduling around your operations", "Bulk pricing for large groups", "Comprehensive reporting and analytics", "Dedicated account management"].map((item, i) => (
-                      <li key={i} className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-foreground">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button asChild size="lg" className="rounded-full">
-                    <Link to="/contact">
-                      Request Corporate Quote
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-                <div className="bg-gradient-to-br from-primary to-coral p-8 lg:p-12 flex items-center justify-center">
-                  <div className="text-center text-primary-foreground">
-                    <Building2 className="h-24 w-24 mx-auto mb-6 opacity-80" />
-                    <p className="font-display text-4xl font-bold mb-2">500+</p>
-                    <p className="text-lg opacity-80">Corporate Clients Trust Us</p>
+          <AnimatedSection animation="fade-up">
+            <Card className="border-0 shadow-warm bg-card overflow-hidden">
+              <CardContent className="p-0">
+                <div className="grid lg:grid-cols-2">
+                  <div className="p-8 lg:p-12">
+                    <Badge variant="secondary" className="mb-4">Corporate Solutions</Badge>
+                    <h2 className="font-display text-3xl font-bold text-foreground mb-4">
+                      Tailored Health Programs for Your Business
+                    </h2>
+                    <p className="text-muted-foreground mb-6">
+                      We work with companies of all sizes to create customized health and wellness programs. 
+                      From mining sites to corporate offices, we bring healthcare to your workplace.
+                    </p>
+                    <ul className="space-y-3 mb-8">
+                      {["Flexible scheduling around your operations", "Bulk pricing for large groups", "Comprehensive reporting and analytics", "Dedicated account management"].map((item, i) => (
+                        <li key={i} className="flex items-center gap-3">
+                          <Check className="h-5 w-5 text-primary flex-shrink-0" />
+                          <span className="text-foreground">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button asChild size="lg" className="rounded-full">
+                      <Link to="/contact">
+                        Request Corporate Quote
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                  <div className="relative h-64 lg:h-auto">
+                    <img 
+                      src={corporateWellnessImage} 
+                      alt="Corporate wellness programs" 
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-l from-primary/60 to-transparent flex items-center justify-center">
+                      <div className="text-center text-primary-foreground p-8">
+                        <Building2 className="h-16 w-16 mx-auto mb-4 opacity-90" />
+                        <p className="font-display text-4xl font-bold mb-2">500+</p>
+                        <p className="text-lg opacity-90">Corporate Clients Trust Us</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </AnimatedSection>
         </div>
       </section>
     </Layout>
