@@ -22,6 +22,9 @@ export type Database = {
           group_size: number
           id: string
           location_id: string | null
+          paid_at: string | null
+          payment_method: string | null
+          payment_reference: string | null
           payment_status: string
           practitioner_id: string | null
           service_id: string
@@ -38,6 +41,9 @@ export type Database = {
           group_size?: number
           id?: string
           location_id?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
           payment_status?: string
           practitioner_id?: string | null
           service_id: string
@@ -54,6 +60,9 @@ export type Database = {
           group_size?: number
           id?: string
           location_id?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
           payment_status?: string
           practitioner_id?: string | null
           service_id?: string
@@ -149,6 +158,97 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json | null
+          payment_method: string | null
+          payment_reference: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          yoco_checkout_id: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          yoco_checkout_id?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          yoco_checkout_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practitioner_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_available: boolean
+          practitioner_id: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_available?: boolean
+          practitioner_id: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_available?: boolean
+          practitioner_id?: string
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practitioner_availability_practitioner_id_fkey"
+            columns: ["practitioner_id"]
+            isOneToOne: false
+            referencedRelation: "practitioners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       practitioners: {
         Row: {
           created_at: string
@@ -158,6 +258,7 @@ export type Database = {
           name: string
           specialization: string | null
           title: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -167,6 +268,7 @@ export type Database = {
           name: string
           specialization?: string | null
           title?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -176,6 +278,7 @@ export type Database = {
           name?: string
           specialization?: string | null
           title?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -278,15 +381,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "practitioner" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -413,6 +543,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "practitioner", "user"],
+    },
   },
 } as const
