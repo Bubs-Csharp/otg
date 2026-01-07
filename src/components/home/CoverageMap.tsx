@@ -34,50 +34,23 @@ export function CoverageMap() {
           {/* Map Visualization */}
           <AnimatedSection animation="scale-in" delay={100}>
             <Card className="border-0 shadow-soft bg-card overflow-hidden">
-              <CardContent className="p-6">
-                <div className="relative aspect-square flex items-center justify-center">
+              <CardContent className="p-8">
+                <div className="relative flex items-center justify-center">
                   <img 
                     src={SouthAfricaMap} 
                     alt="South Africa coverage map showing all 9 provinces" 
-                    className="w-full h-full object-contain [&_path]:fill-primary/60 [&_path]:stroke-background [&_path]:hover:fill-primary [&_path]:transition-colors"
+                    className="w-full max-w-md h-auto object-contain"
                     style={{
-                      filter: 'hue-rotate(140deg) saturate(0.8)'
+                      filter: 'hue-rotate(140deg) saturate(0.7) brightness(1.1)'
                     }}
                   />
-                  {/* Pulsing indicators for major cities */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    {/* Gauteng - Johannesburg */}
-                    <div className="absolute top-[35%] left-[58%] w-4 h-4">
-                      <span className="absolute inset-0 rounded-full bg-coral animate-ping opacity-75"></span>
-                      <span className="relative block w-4 h-4 rounded-full bg-coral"></span>
-                    </div>
-                    {/* Western Cape - Cape Town */}
-                    <div className="absolute top-[75%] left-[22%] w-4 h-4">
-                      <span className="absolute inset-0 rounded-full bg-coral animate-ping opacity-75" style={{ animationDelay: '0.2s' }}></span>
-                      <span className="relative block w-4 h-4 rounded-full bg-coral"></span>
-                    </div>
-                    {/* KZN - Durban */}
-                    <div className="absolute top-[55%] left-[72%] w-4 h-4">
-                      <span className="absolute inset-0 rounded-full bg-coral animate-ping opacity-75" style={{ animationDelay: '0.4s' }}></span>
-                      <span className="relative block w-4 h-4 rounded-full bg-coral"></span>
-                    </div>
-                    {/* Limpopo */}
-                    <div className="absolute top-[18%] left-[60%] w-3 h-3">
-                      <span className="absolute inset-0 rounded-full bg-coral/80 animate-ping opacity-75" style={{ animationDelay: '0.6s' }}></span>
-                      <span className="relative block w-3 h-3 rounded-full bg-coral/80"></span>
-                    </div>
-                    {/* Mpumalanga */}
-                    <div className="absolute top-[30%] left-[70%] w-3 h-3">
-                      <span className="absolute inset-0 rounded-full bg-coral/80 animate-ping opacity-75" style={{ animationDelay: '0.8s' }}></span>
-                      <span className="relative block w-3 h-3 rounded-full bg-coral/80"></span>
-                    </div>
-                  </div>
                 </div>
-                <div className="text-center mt-4">
-                  <p className="text-sm text-primary font-medium">
-                    <MapPin className="inline h-4 w-4 mr-1" />
-                    All 9 provinces covered
-                  </p>
+                <div className="text-center mt-6 space-y-2">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-primary">All 9 provinces covered</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Mobile healthcare services nationwide</p>
                 </div>
               </CardContent>
             </Card>
