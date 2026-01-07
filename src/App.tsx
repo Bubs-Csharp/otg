@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Book from "./pages/Book";
 import PractitionerDashboard from "./pages/PractitionerDashboard";
+import PractitionerOnboarding from "./pages/PractitionerOnboarding";
 import AdminDashboard from "./pages/AdminDashboard";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancelled from "./pages/PaymentCancelled";
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/book" element={<Book />} />
             <Route path="/practitioner" element={<PractitionerDashboard />} />
+            <Route path="/practitioner/onboarding" element={<PractitionerOnboarding />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-cancelled" element={<PaymentCancelled />} />

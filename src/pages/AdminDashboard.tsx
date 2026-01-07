@@ -26,7 +26,10 @@ import {
   TrendingUp,
   BarChart3,
   Settings,
-  UserCog
+  UserCog,
+  Mail,
+  Loader2,
+  Send
 } from 'lucide-react';
 import { format, parseISO, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 
@@ -100,7 +103,10 @@ const AdminDashboard = () => {
   const [practitionerSpecialization, setPractitionerSpecialization] = useState('');
   const [practitionerImageUrl, setPractitionerImageUrl] = useState('');
   const [practitionerEmail, setPractitionerEmail] = useState('');
+  const [practitionerTemporaryPassword, setPractitionerTemporaryPassword] = useState('');
   const [practitionerIsActive, setPractitionerIsActive] = useState(true);
+  const [isInviting, setIsInviting] = useState(false);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -251,6 +257,7 @@ const AdminDashboard = () => {
       setPractitionerImageUrl(practitioner.image_url || '');
       setPractitionerIsActive(practitioner.is_active);
       setPractitionerEmail('');
+      setPractitionerTemporaryPassword('');
     } else {
       setEditingPractitioner(null);
       setPractitionerName('');
@@ -259,8 +266,70 @@ const AdminDashboard = () => {
       setPractitionerImageUrl('');
       setPractitionerIsActive(true);
       setPractitionerEmail('');
+      setPractitionerTemporaryPassword('');
     }
     setIsPractitionerDialogOpen(true);
+  };
+
+  const openInviteDialog = () => {
+    setPractitionerName('');
+    setPractitionerTitle('');
+    setPractitionerSpecialization('');
+    setPractitionerEmail('');
+    setPractitionerTemporaryPassword(generateTempPassword());
+    setIsInviteDialogOpen(true);
+  };
+
+  const generateTempPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  };
+
+  const invitePractitioner = async () => {
+    if (!practitionerName || !practitionerEmail || !practitionerTemporaryPassword) {
+      toast({ title: 'Please fill in all required fields', variant: 'destructive' });
+      return;
+    }
+
+    setIsInviting(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('send-practitioner-invite', {
+        body: {
+          name: practitionerName,
+          email: practitionerEmail,
+          title: practitionerTitle || undefined,
+          specialization: practitionerSpecialization || undefined,
+          temporaryPassword: practitionerTemporaryPassword,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to send invite');
+      }
+
+      toast({
+        title: 'Invitation sent!',
+        description: `An email has been sent to ${practitionerEmail} with login credentials and onboarding instructions.`,
+      });
+      
+      setIsInviteDialogOpen(false);
+      fetchData();
+    } catch (error: any) {
+      console.error('Error inviting practitioner:', error);
+      toast({ 
+        title: 'Error sending invitation', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    } finally {
+      setIsInviting(false);
+    }
   };
 
   const savePractitioner = async () => {
@@ -280,26 +349,6 @@ const AdminDashboard = () => {
           .eq('id', editingPractitioner.id);
         if (error) throw error;
         toast({ title: 'Practitioner updated successfully' });
-      } else {
-        // Create practitioner
-        const { data: newPractitioner, error: practitionerError } = await supabase
-          .from('practitioners')
-          .insert(practitionerData)
-          .select()
-          .single();
-        if (practitionerError) throw practitionerError;
-
-        // If email provided, look up user and link + add practitioner role
-        if (practitionerEmail && newPractitioner) {
-          // Note: Admin would need to manually link user_id after user registers
-          // For now, just create the practitioner profile
-          toast({ 
-            title: 'Practitioner created',
-            description: 'The practitioner can be linked to a user account after they register.'
-          });
-        } else {
-          toast({ title: 'Practitioner created successfully' });
-        }
       }
 
       setIsPractitionerDialogOpen(false);
@@ -474,66 +523,133 @@ const AdminDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle>Practitioner Management</CardTitle>
-                      <CardDescription>Add, edit, and manage your practitioners</CardDescription>
+                      <CardDescription>Invite and manage your practitioners</CardDescription>
                     </div>
-                    <Dialog open={isPractitionerDialogOpen} onOpenChange={setIsPractitionerDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button onClick={() => openPractitionerDialog()}>
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Practitioner
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>{editingPractitioner ? 'Edit Practitioner' : 'Add New Practitioner'}</DialogTitle>
-                          <DialogDescription>Fill in the practitioner details below</DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="space-y-2">
-                            <Label>Full Name *</Label>
-                            <Input 
-                              value={practitionerName} 
-                              onChange={(e) => setPractitionerName(e.target.value)}
-                              placeholder="e.g., Dr. Sarah Johnson"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Title</Label>
-                            <Input 
-                              value={practitionerTitle} 
-                              onChange={(e) => setPractitionerTitle(e.target.value)}
-                              placeholder="e.g., Senior Physiotherapist"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Specialization</Label>
-                            <Input 
-                              value={practitionerSpecialization} 
-                              onChange={(e) => setPractitionerSpecialization(e.target.value)}
-                              placeholder="e.g., Sports Injuries, Rehabilitation"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Image URL</Label>
-                            <Input 
-                              value={practitionerImageUrl} 
-                              onChange={(e) => setPractitionerImageUrl(e.target.value)}
-                              placeholder="https://..."
-                            />
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <Label>Active Status</Label>
-                            <Switch 
-                              checked={practitionerIsActive}
-                              onCheckedChange={setPractitionerIsActive}
-                            />
-                          </div>
-                          <Button onClick={savePractitioner} className="w-full" disabled={!practitionerName}>
-                            {editingPractitioner ? 'Update Practitioner' : 'Create Practitioner'}
+                    <div className="flex gap-2">
+                      {/* Invite New Practitioner Dialog */}
+                      <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button onClick={openInviteDialog}>
+                            <Send className="w-4 h-4 mr-2" />
+                            Invite Practitioner
                           </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Invite New Practitioner</DialogTitle>
+                            <DialogDescription>
+                              Send an invitation email with login credentials and onboarding link
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <Label>Full Name *</Label>
+                              <Input 
+                                value={practitionerName} 
+                                onChange={(e) => setPractitionerName(e.target.value)}
+                                placeholder="e.g., Dr. Sarah Johnson"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Email Address *</Label>
+                              <Input 
+                                type="email"
+                                value={practitionerEmail} 
+                                onChange={(e) => setPractitionerEmail(e.target.value)}
+                                placeholder="practitioner@email.com"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Title</Label>
+                              <Input 
+                                value={practitionerTitle} 
+                                onChange={(e) => setPractitionerTitle(e.target.value)}
+                                placeholder="e.g., Senior Physiotherapist"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Specialization</Label>
+                              <Input 
+                                value={practitionerSpecialization} 
+                                onChange={(e) => setPractitionerSpecialization(e.target.value)}
+                                placeholder="e.g., Sports Injuries"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Temporary Password</Label>
+                              <div className="flex gap-2">
+                                <Input 
+                                  value={practitionerTemporaryPassword} 
+                                  onChange={(e) => setPractitionerTemporaryPassword(e.target.value)}
+                                />
+                                <Button type="button" variant="outline" onClick={() => setPractitionerTemporaryPassword(generateTempPassword())}>
+                                  Generate
+                                </Button>
+                              </div>
+                              <p className="text-xs text-muted-foreground">This will be sent to the practitioner</p>
+                            </div>
+                            <Button 
+                              onClick={invitePractitioner} 
+                              className="w-full" 
+                              disabled={!practitionerName || !practitionerEmail || !practitionerTemporaryPassword || isInviting}
+                            >
+                              {isInviting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
+                              {isInviting ? 'Sending...' : 'Send Invitation'}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
+                      {/* Edit Practitioner Dialog */}
+                      <Dialog open={isPractitionerDialogOpen} onOpenChange={setIsPractitionerDialogOpen}>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Edit Practitioner</DialogTitle>
+                            <DialogDescription>Update practitioner details</DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <Label>Full Name *</Label>
+                              <Input 
+                                value={practitionerName} 
+                                onChange={(e) => setPractitionerName(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Title</Label>
+                              <Input 
+                                value={practitionerTitle} 
+                                onChange={(e) => setPractitionerTitle(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Specialization</Label>
+                              <Input 
+                                value={practitionerSpecialization} 
+                                onChange={(e) => setPractitionerSpecialization(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Image URL</Label>
+                              <Input 
+                                value={practitionerImageUrl} 
+                                onChange={(e) => setPractitionerImageUrl(e.target.value)}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <Label>Active Status</Label>
+                              <Switch 
+                                checked={practitionerIsActive}
+                                onCheckedChange={setPractitionerIsActive}
+                              />
+                            </div>
+                            <Button onClick={savePractitioner} className="w-full" disabled={!practitionerName}>
+                              Update Practitioner
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
