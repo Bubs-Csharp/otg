@@ -1,8 +1,16 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone, Heart } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, Phone, Heart, User, LogOut, Calendar, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -15,8 +23,15 @@ const navigation = [
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full glass">
@@ -63,9 +78,49 @@ export function Header() {
             <Phone className="h-4 w-4" />
             <span>+27 12 345 6789</span>
           </a>
-          <Button className="rounded-full shadow-warm">
-            Book Now
-          </Button>
+          
+          {user ? (
+            <>
+              <Button asChild variant="outline" className="rounded-full">
+                <Link to="/book">Book Now</Link>
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <Calendar className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                      <Settings className="h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 cursor-pointer text-destructive">
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost" className="rounded-full">
+                <Link to="/auth">Login</Link>
+              </Button>
+              <Button asChild className="rounded-full shadow-warm">
+                <Link to="/auth?mode=signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -106,7 +161,7 @@ export function Header() {
               {item.name}
             </Link>
           ))}
-          <div className="pt-4 space-y-3">
+          <div className="pt-4 space-y-3 border-t border-border">
             <a
               href="tel:+27123456789"
               className="flex items-center gap-2 px-4 py-2 text-muted-foreground"
@@ -114,9 +169,50 @@ export function Header() {
               <Phone className="h-4 w-4" />
               <span>+27 12 345 6789</span>
             </a>
-            <Button className="w-full rounded-full shadow-warm">
-              Book Now
-            </Button>
+            
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Dashboard
+                </Link>
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                  <Settings className="h-4 w-4" />
+                  Profile
+                </Link>
+                <Button asChild className="w-full rounded-full shadow-warm">
+                  <Link to="/book" onClick={() => setMobileMenuOpen(false)}>Book Now</Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full"
+                  onClick={() => {
+                    handleSignOut();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild variant="outline" className="w-full rounded-full">
+                  <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+                </Button>
+                <Button asChild className="w-full rounded-full shadow-warm">
+                  <Link to="/auth?mode=signup" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
