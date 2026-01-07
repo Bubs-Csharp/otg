@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Heart, Phone, Mail, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const footerLinks = {
   services: [
@@ -37,9 +38,11 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground/20">
-                <Heart className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <img 
+                src={logo} 
+                alt="Therapy on the Go" 
+                className="h-12 w-auto brightness-0 invert"
+              />
               <div className="flex flex-col">
                 <span className="font-display text-lg font-semibold leading-tight">
                   Therapy on the Go
