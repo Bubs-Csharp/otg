@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Calendar, 
@@ -24,7 +25,8 @@ import {
   Trash2,
   TrendingUp,
   BarChart3,
-  Settings
+  Settings,
+  UserCog
 } from 'lucide-react';
 import { format, parseISO, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 
@@ -36,6 +38,17 @@ interface Service {
   price: number;
   duration_minutes: number;
   is_active: boolean;
+}
+
+interface Practitioner {
+  id: string;
+  name: string;
+  title: string | null;
+  specialization: string | null;
+  image_url: string | null;
+  is_active: boolean;
+  user_id: string | null;
+  created_at: string;
 }
 
 interface Booking {
@@ -65,11 +78,14 @@ const AdminDashboard = () => {
   const { toast } = useToast();
 
   const [services, setServices] = useState<Service[]>([]);
+  const [practitioners, setPractitioners] = useState<Practitioner[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
+  const [editingPractitioner, setEditingPractitioner] = useState<Practitioner | null>(null);
+  const [isPractitionerDialogOpen, setIsPractitionerDialogOpen] = useState(false);
 
   // Service form state
   const [serviceName, setServiceName] = useState('');
@@ -77,6 +93,14 @@ const AdminDashboard = () => {
   const [serviceCategory, setServiceCategory] = useState('');
   const [servicePrice, setServicePrice] = useState('');
   const [serviceDuration, setServiceDuration] = useState('30');
+
+  // Practitioner form state
+  const [practitionerName, setPractitionerName] = useState('');
+  const [practitionerTitle, setPractitionerTitle] = useState('');
+  const [practitionerSpecialization, setPractitionerSpecialization] = useState('');
+  const [practitionerImageUrl, setPractitionerImageUrl] = useState('');
+  const [practitionerEmail, setPractitionerEmail] = useState('');
+  const [practitionerIsActive, setPractitionerIsActive] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -99,17 +123,19 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [servicesRes, bookingsRes] = await Promise.all([
+      const [servicesRes, bookingsRes, practitionersRes] = await Promise.all([
         supabase.from('services').select('*').order('category'),
         supabase.from('bookings').select(`
           *,
           service:services(name),
           practitioner:practitioners(name)
         `).order('booking_date', { ascending: false }).limit(100),
+        supabase.from('practitioners').select('*').order('name'),
       ]);
 
       if (servicesRes.data) setServices(servicesRes.data);
       if (bookingsRes.data) setBookings(bookingsRes.data);
+      if (practitionersRes.data) setPractitioners(practitionersRes.data);
 
       // Calculate analytics
       const allBookings = bookingsRes.data || [];
@@ -215,6 +241,103 @@ const AdminDashboard = () => {
     }
   };
 
+  // Practitioner CRUD
+  const openPractitionerDialog = (practitioner?: Practitioner) => {
+    if (practitioner) {
+      setEditingPractitioner(practitioner);
+      setPractitionerName(practitioner.name);
+      setPractitionerTitle(practitioner.title || '');
+      setPractitionerSpecialization(practitioner.specialization || '');
+      setPractitionerImageUrl(practitioner.image_url || '');
+      setPractitionerIsActive(practitioner.is_active);
+      setPractitionerEmail('');
+    } else {
+      setEditingPractitioner(null);
+      setPractitionerName('');
+      setPractitionerTitle('');
+      setPractitionerSpecialization('');
+      setPractitionerImageUrl('');
+      setPractitionerIsActive(true);
+      setPractitionerEmail('');
+    }
+    setIsPractitionerDialogOpen(true);
+  };
+
+  const savePractitioner = async () => {
+    try {
+      const practitionerData = {
+        name: practitionerName,
+        title: practitionerTitle || null,
+        specialization: practitionerSpecialization || null,
+        image_url: practitionerImageUrl || null,
+        is_active: practitionerIsActive,
+      };
+
+      if (editingPractitioner) {
+        const { error } = await supabase
+          .from('practitioners')
+          .update(practitionerData)
+          .eq('id', editingPractitioner.id);
+        if (error) throw error;
+        toast({ title: 'Practitioner updated successfully' });
+      } else {
+        // Create practitioner
+        const { data: newPractitioner, error: practitionerError } = await supabase
+          .from('practitioners')
+          .insert(practitionerData)
+          .select()
+          .single();
+        if (practitionerError) throw practitionerError;
+
+        // If email provided, look up user and link + add practitioner role
+        if (practitionerEmail && newPractitioner) {
+          // Note: Admin would need to manually link user_id after user registers
+          // For now, just create the practitioner profile
+          toast({ 
+            title: 'Practitioner created',
+            description: 'The practitioner can be linked to a user account after they register.'
+          });
+        } else {
+          toast({ title: 'Practitioner created successfully' });
+        }
+      }
+
+      setIsPractitionerDialogOpen(false);
+      fetchData();
+    } catch (error) {
+      console.error('Error saving practitioner:', error);
+      toast({ title: 'Error saving practitioner', variant: 'destructive' });
+    }
+  };
+
+  const togglePractitionerStatus = async (practitioner: Practitioner) => {
+    try {
+      const { error } = await supabase
+        .from('practitioners')
+        .update({ is_active: !practitioner.is_active })
+        .eq('id', practitioner.id);
+      if (error) throw error;
+      toast({ title: `Practitioner ${practitioner.is_active ? 'deactivated' : 'activated'}` });
+      fetchData();
+    } catch (error) {
+      console.error('Error toggling practitioner:', error);
+    }
+  };
+
+  const deletePractitioner = async (practitionerId: string) => {
+    if (!confirm('Are you sure you want to delete this practitioner?')) return;
+    
+    try {
+      const { error } = await supabase.from('practitioners').delete().eq('id', practitionerId);
+      if (error) throw error;
+      toast({ title: 'Practitioner deleted' });
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting practitioner:', error);
+      toast({ title: 'Cannot delete practitioner with existing bookings', variant: 'destructive' });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
@@ -307,6 +430,7 @@ const AdminDashboard = () => {
           <Tabs defaultValue="bookings">
             <TabsList className="mb-6">
               <TabsTrigger value="bookings">All Bookings</TabsTrigger>
+              <TabsTrigger value="practitioners">Practitioners</TabsTrigger>
               <TabsTrigger value="services">Services</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
@@ -339,6 +463,121 @@ const AdminDashboard = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="practitioners">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Practitioner Management</CardTitle>
+                      <CardDescription>Add, edit, and manage your practitioners</CardDescription>
+                    </div>
+                    <Dialog open={isPractitionerDialogOpen} onOpenChange={setIsPractitionerDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button onClick={() => openPractitionerDialog()}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Practitioner
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>{editingPractitioner ? 'Edit Practitioner' : 'Add New Practitioner'}</DialogTitle>
+                          <DialogDescription>Fill in the practitioner details below</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label>Full Name *</Label>
+                            <Input 
+                              value={practitionerName} 
+                              onChange={(e) => setPractitionerName(e.target.value)}
+                              placeholder="e.g., Dr. Sarah Johnson"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Title</Label>
+                            <Input 
+                              value={practitionerTitle} 
+                              onChange={(e) => setPractitionerTitle(e.target.value)}
+                              placeholder="e.g., Senior Physiotherapist"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Specialization</Label>
+                            <Input 
+                              value={practitionerSpecialization} 
+                              onChange={(e) => setPractitionerSpecialization(e.target.value)}
+                              placeholder="e.g., Sports Injuries, Rehabilitation"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Image URL</Label>
+                            <Input 
+                              value={practitionerImageUrl} 
+                              onChange={(e) => setPractitionerImageUrl(e.target.value)}
+                              placeholder="https://..."
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label>Active Status</Label>
+                            <Switch 
+                              checked={practitionerIsActive}
+                              onCheckedChange={setPractitionerIsActive}
+                            />
+                          </div>
+                          <Button onClick={savePractitioner} className="w-full" disabled={!practitionerName}>
+                            {editingPractitioner ? 'Update Practitioner' : 'Create Practitioner'}
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {practitioners.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">No practitioners yet. Add your first practitioner above.</p>
+                    ) : (
+                      practitioners.map(practitioner => (
+                        <div key={practitioner.id} className={`flex items-center justify-between p-4 rounded-lg ${practitioner.is_active ? 'bg-muted/50' : 'bg-muted/20 opacity-60'}`}>
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                              {practitioner.image_url ? (
+                                <img src={practitioner.image_url} alt={practitioner.name} className="w-12 h-12 rounded-full object-cover" />
+                              ) : (
+                                <UserCog className="w-6 h-6 text-primary" />
+                              )}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{practitioner.name}</span>
+                                {!practitioner.is_active && <Badge variant="secondary">Inactive</Badge>}
+                                {practitioner.user_id && <Badge variant="outline" className="text-xs">Linked</Badge>}
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {practitioner.title && `${practitioner.title}`}
+                                {practitioner.title && practitioner.specialization && ' • '}
+                                {practitioner.specialization}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="ghost" onClick={() => openPractitionerDialog(practitioner)}>
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => togglePractitionerStatus(practitioner)}>
+                              <Settings className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deletePractitioner(practitioner.id)}>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </CardContent>
               </Card>
