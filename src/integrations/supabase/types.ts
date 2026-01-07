@@ -565,6 +565,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      validate_invitation_token: {
+        Args: { token_param: string }
+        Returns: {
+          email: string
+          expires_at: string
+          invitation_id: string
+          name: string
+          practitioner_id: string
+          specialization: string
+          status: string
+          title: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "practitioner" | "user"
