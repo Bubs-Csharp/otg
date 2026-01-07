@@ -112,7 +112,7 @@ const Auth = () => {
         title: 'Welcome Back!',
         description: 'You have successfully logged in.',
       });
-      navigate('/dashboard');
+      // Role-based redirect is handled by useEffect
     }
   };
 
@@ -143,7 +143,7 @@ const Auth = () => {
         title: 'Account Created!',
         description: 'Welcome to Impilo Yami Health Services.',
       });
-      navigate('/dashboard');
+      // Role-based redirect is handled by useEffect
     }
   };
 
