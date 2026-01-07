@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/carousel";
 import { ArrowRight, Stethoscope, Activity, Building2, Car, HeartPulse, Eye, Syringe, FileCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AnimatedSection } from "@/components/ui/animated-section";
 
 const services = [
   {
@@ -73,62 +74,64 @@ export function ServicesCarousel() {
   return (
     <section className="py-16 lg:py-24 bg-muted/50">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <AnimatedSection animation="fade-up" className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
             Our Services
           </h2>
           <p className="text-muted-foreground">
             Comprehensive healthcare solutions for individuals and businesses
           </p>
-        </div>
+        </AnimatedSection>
 
-        <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-4">
-            {services.map((service, index) => (
-              <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                <Card className="border-0 shadow-soft hover-lift bg-card group cursor-pointer h-full">
-                  <CardContent className="p-6 flex flex-col h-full">
-                    <div className="w-12 h-12 rounded-xl bg-coral-light flex items-center justify-center mb-4 group-hover:bg-coral/20 transition-colors">
-                      <service.icon className="h-6 w-6 text-coral" />
-                    </div>
-                    <h3 className="font-display font-semibold text-lg text-foreground mb-2">
-                      {service.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-4 flex-1">
-                      {service.description}
-                    </p>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{service.duration}</span>
-                        <span className="font-semibold text-primary">{service.price}</span>
+        <AnimatedSection animation="fade-up" delay={200}>
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-4">
+              {services.map((service, index) => (
+                <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                  <Card className="border-0 shadow-soft hover-lift bg-card group cursor-pointer h-full card-press">
+                    <CardContent className="p-6 flex flex-col h-full">
+                      <div className="w-12 h-12 rounded-xl bg-coral-light flex items-center justify-center mb-4 group-hover:bg-coral/20 transition-colors group-hover:scale-110 transform duration-300">
+                        <service.icon className="h-6 w-6 text-coral" />
                       </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <div className="flex justify-center gap-2 mt-8">
-            <CarouselPrevious className="static translate-y-0" />
-            <CarouselNext className="static translate-y-0" />
-          </div>
-        </Carousel>
+                      <h3 className="font-display font-semibold text-lg text-foreground mb-2">
+                        {service.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-4 flex-1">
+                        {service.description}
+                      </p>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">{service.duration}</span>
+                          <span className="font-semibold text-primary">{service.price}</span>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="flex justify-center gap-2 mt-8">
+              <CarouselPrevious className="static translate-y-0 hover-scale" />
+              <CarouselNext className="static translate-y-0 hover-scale" />
+            </div>
+          </Carousel>
+        </AnimatedSection>
 
-        <div className="text-center mt-10">
-          <Button asChild size="lg" variant="outline" className="rounded-full">
+        <AnimatedSection animation="fade-up" delay={300} className="text-center mt-10">
+          <Button asChild size="lg" variant="outline" className="rounded-full hover-scale">
             <Link to="/services">
               View All Services
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
-        </div>
+        </AnimatedSection>
       </div>
     </section>
   );
