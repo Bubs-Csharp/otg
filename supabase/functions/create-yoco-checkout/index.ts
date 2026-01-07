@@ -8,8 +8,7 @@ const corsHeaders = {
 
 interface CheckoutRequest {
   booking_id: string;
-  amount: number;
-  currency: string;
+  currency?: string;
   success_url: string;
   cancel_url: string;
   metadata?: Record<string, string>;
@@ -42,8 +41,61 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    const { booking_id, amount, currency, success_url, cancel_url, metadata }: CheckoutRequest = await req.json();
+    const { booking_id, currency, success_url, cancel_url, metadata }: CheckoutRequest = await req.json();
     
+    // Validate booking_id format (UUID)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!booking_id || !uuidRegex.test(booking_id)) {
+      console.error("Invalid booking_id format:", booking_id);
+      return new Response(
+        JSON.stringify({ error: "Invalid booking ID" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Fetch booking from database to validate ownership and get correct amount
+    const { data: booking, error: bookingError } = await supabaseClient
+      .from("bookings")
+      .select("total_amount, user_id, payment_status")
+      .eq("id", booking_id)
+      .single();
+
+    if (bookingError || !booking) {
+      console.error("Error fetching booking:", bookingError);
+      return new Response(
+        JSON.stringify({ error: "Booking not found" }),
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Verify the booking belongs to the authenticated user
+    if (booking.user_id !== user.id) {
+      console.error("User attempting to pay for another user's booking");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - booking does not belong to user" }),
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Check if booking is already paid
+    if (booking.payment_status === "paid") {
+      console.error("Booking already paid:", booking_id);
+      return new Response(
+        JSON.stringify({ error: "Booking has already been paid" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Use the amount from the database, not from client
+    const amount = Number(booking.total_amount);
+    if (isNaN(amount) || amount <= 0) {
+      console.error("Invalid booking amount:", booking.total_amount);
+      return new Response(
+        JSON.stringify({ error: "Invalid booking amount" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     console.log("Creating Yoco checkout for booking:", booking_id, "amount:", amount);
 
     // Validate amount (Yoco expects amount in cents)
@@ -91,11 +143,11 @@ serve(async (req: Request): Promise<Response> => {
     const yocoData = await yocoResponse.json();
     console.log("Yoco checkout created:", yocoData.id);
 
-    // Create payment record
+    // Create payment record with amount from database
     const { error: paymentError } = await supabaseClient.from("payments").insert({
       booking_id,
       user_id: user.id,
-      amount,
+      amount: amount,
       currency: currency || "ZAR",
       status: "pending",
       yoco_checkout_id: yocoData.id,
