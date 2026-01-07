@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, Mail, Lock, User, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
+import logo from '@/assets/logo.png';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -194,9 +195,11 @@ const Auth = () => {
         <Card className="glass-card border-0 shadow-soft">
           <CardHeader className="text-center space-y-4">
             <div className="flex justify-center">
-              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-lg">
-                <Heart className="w-8 h-8 text-white" />
-              </div>
+              <img 
+                src={logo} 
+                alt="Therapy on the Go" 
+                className="h-20 w-auto"
+              />
             </div>
             <div>
               <CardTitle className="text-2xl font-bold text-foreground">

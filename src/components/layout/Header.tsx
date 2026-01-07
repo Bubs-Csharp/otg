@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Phone, Heart, User, LogOut, Calendar, Settings, Shield, Stethoscope } from "lucide-react";
+import { Menu, X, Phone, User, LogOut, Calendar, Settings, Shield, Stethoscope } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,9 +41,11 @@ export function Header() {
       <nav className="container mx-auto flex items-center justify-between px-4 py-4 lg:px-8">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform group-hover:scale-105">
-            <Heart className="h-5 w-5" />
-          </div>
+          <img 
+            src={logo} 
+            alt="Therapy on the Go" 
+            className="h-12 w-auto transition-transform group-hover:scale-105"
+          />
           <div className="flex flex-col">
             <span className="font-display text-lg font-semibold text-foreground leading-tight">
               Therapy on the Go
