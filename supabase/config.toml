@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.yoco-webhook]
 verify_jwt = false
+
+[functions.send-practitioner-invite]
+verify_jwt = false

@@ -249,6 +249,157 @@ export type Database = {
           },
         ]
       }
+      practitioner_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          name: string
+          practitioner_id: string | null
+          specialization: string | null
+          status: string
+          title: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          name: string
+          practitioner_id?: string | null
+          specialization?: string | null
+          status?: string
+          title?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          name?: string
+          practitioner_id?: string | null
+          specialization?: string | null
+          status?: string
+          title?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practitioner_invitations_practitioner_id_fkey"
+            columns: ["practitioner_id"]
+            isOneToOne: false
+            referencedRelation: "practitioners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practitioner_profiles: {
+        Row: {
+          address: string | null
+          bio: string | null
+          certifications: string[] | null
+          city: string | null
+          consultation_fee: number | null
+          contact_preference: string | null
+          created_at: string
+          date_of_birth: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          id: string
+          id_number: string | null
+          languages: string[] | null
+          license_expiry: string | null
+          license_number: string | null
+          onboarding_completed: boolean
+          onboarding_completed_at: string | null
+          phone: string | null
+          postal_code: string | null
+          practitioner_id: string
+          professional_registration: string | null
+          profile_photo_url: string | null
+          province: string | null
+          qualifications: string[] | null
+          services_offered: string[] | null
+          updated_at: string
+          years_of_experience: number | null
+        }
+        Insert: {
+          address?: string | null
+          bio?: string | null
+          certifications?: string[] | null
+          city?: string | null
+          consultation_fee?: number | null
+          contact_preference?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          id?: string
+          id_number?: string | null
+          languages?: string[] | null
+          license_expiry?: string | null
+          license_number?: string | null
+          onboarding_completed?: boolean
+          onboarding_completed_at?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          practitioner_id: string
+          professional_registration?: string | null
+          profile_photo_url?: string | null
+          province?: string | null
+          qualifications?: string[] | null
+          services_offered?: string[] | null
+          updated_at?: string
+          years_of_experience?: number | null
+        }
+        Update: {
+          address?: string | null
+          bio?: string | null
+          certifications?: string[] | null
+          city?: string | null
+          consultation_fee?: number | null
+          contact_preference?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          id?: string
+          id_number?: string | null
+          languages?: string[] | null
+          license_expiry?: string | null
+          license_number?: string | null
+          onboarding_completed?: boolean
+          onboarding_completed_at?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          practitioner_id?: string
+          professional_registration?: string | null
+          profile_photo_url?: string | null
+          province?: string | null
+          qualifications?: string[] | null
+          services_offered?: string[] | null
+          updated_at?: string
+          years_of_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practitioner_profiles_practitioner_id_fkey"
+            columns: ["practitioner_id"]
+            isOneToOne: true
+            referencedRelation: "practitioners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       practitioners: {
         Row: {
           created_at: string
