@@ -165,12 +165,8 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     // 6. Send invitation email
-    const appUrl = Deno.env.get("SUPABASE_URL")?.includes("localhost") 
-      ? "http://localhost:5173"
-      : `https://${Deno.env.get("SUPABASE_URL")?.split("//")[1]?.split(".")[0]}.lovableproject.com`;
-    
-    // Use a simple fallback for the app URL
-    const onboardingUrl = `${appUrl.replace('supabase.co', 'lovableproject.com')}/practitioner/onboarding?token=${invitation?.token || ''}`;
+    const appUrl = "https://otg.lovable.app";
+    const onboardingUrl = `${appUrl}/practitioner/onboarding?token=${invitation?.token || ''}`;
 
     console.log(`Sending invite email to ${email}`);
 
