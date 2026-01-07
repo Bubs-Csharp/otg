@@ -1,6 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Award, GraduationCap, Building } from "lucide-react";
+import { AnimatedSection, StaggeredContainer } from "@/components/ui/animated-section";
+import { CounterAnimation } from "@/components/ui/counter-animation";
 
 const accreditations = [
   {
@@ -30,16 +32,16 @@ const accreditations = [
 ];
 
 const teamHighlights = [
-  { stat: "50+", label: "Healthcare Professionals" },
-  { stat: "15+", label: "Years Combined Experience" },
-  { stat: "100%", label: "Qualified & Certified" },
+  { value: 50, suffix: "+", label: "Healthcare Professionals" },
+  { value: 15, suffix: "+", label: "Years Combined Experience" },
+  { value: 100, suffix: "%", label: "Qualified & Certified" },
 ];
 
 export function TrustIndicators() {
   return (
     <section className="py-16 lg:py-24 bg-accent/30">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <AnimatedSection animation="fade-up" className="text-center max-w-2xl mx-auto mb-12">
           <Badge variant="secondary" className="mb-4">Trusted & Certified</Badge>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
             Professional Accreditations
@@ -47,15 +49,19 @@ export function TrustIndicators() {
           <p className="text-muted-foreground">
             Our team consists of fully qualified healthcare professionals registered with all relevant South African health bodies
           </p>
-        </div>
+        </AnimatedSection>
 
         {/* Accreditations */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <StaggeredContainer 
+          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+          staggerDelay={100}
+          animation="fade-up"
+        >
           {accreditations.map((acc) => (
-            <Card key={acc.name} className="border-0 shadow-soft bg-card text-center">
+            <Card key={acc.name} className="border-0 shadow-soft bg-card text-center hover-lift group">
               <CardContent className="p-6">
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <acc.icon className="h-7 w-7 text-primary" />
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                  <acc.icon className="h-7 w-7 text-primary icon-hover" />
                 </div>
                 <h3 className="font-display font-bold text-xl text-primary mb-1">
                   {acc.name}
@@ -65,23 +71,31 @@ export function TrustIndicators() {
               </CardContent>
             </Card>
           ))}
-        </div>
+        </StaggeredContainer>
 
         {/* Team Highlights */}
-        <Card className="border-0 shadow-warm bg-card">
-          <CardContent className="p-8">
-            <div className="grid md:grid-cols-3 gap-8 text-center">
-              {teamHighlights.map((item) => (
-                <div key={item.label}>
-                  <p className="font-display text-4xl font-bold text-coral mb-2">
-                    {item.stat}
-                  </p>
-                  <p className="text-muted-foreground">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <AnimatedSection animation="fade-up" delay={300}>
+          <Card className="border-0 shadow-warm bg-card">
+            <CardContent className="p-8">
+              <div className="grid md:grid-cols-3 gap-8 text-center">
+                {teamHighlights.map((item, index) => (
+                  <div key={item.label} className="group">
+                    <p className="font-display text-4xl font-bold text-coral mb-2">
+                      <CounterAnimation 
+                        value={item.value} 
+                        suffix={item.suffix}
+                        duration={2000 + index * 200}
+                      />
+                    </p>
+                    <p className="text-muted-foreground group-hover:text-foreground transition-colors">
+                      {item.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </AnimatedSection>
       </div>
     </section>
   );
