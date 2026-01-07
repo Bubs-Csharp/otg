@@ -33,14 +33,19 @@ const Auth = () => {
 
   // Role-based redirect after login
   useEffect(() => {
+    // Only redirect once we have user AND roles have finished loading
     if (user && !rolesLoading) {
-      if (isAdmin) {
-        navigate('/admin');
-      } else if (isPractitioner) {
-        navigate('/practitioner');
-      } else {
-        navigate('/dashboard');
-      }
+      // Small delay to ensure roles are properly fetched
+      const timer = setTimeout(() => {
+        if (isAdmin) {
+          navigate('/admin');
+        } else if (isPractitioner) {
+          navigate('/practitioner');
+        } else {
+          navigate('/dashboard');
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [user, isAdmin, isPractitioner, rolesLoading, navigate]);
 
