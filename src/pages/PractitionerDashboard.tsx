@@ -11,7 +11,6 @@ import {
   Clock, 
   Users,
   TrendingUp,
-  CalendarDays,
   UserCheck,
   Bell
 } from 'lucide-react';
@@ -19,7 +18,7 @@ import { format, parseISO, isToday, isTomorrow, isPast, startOfWeek, addDays } f
 import { 
   QuickStatsCard, 
   NextAppointmentCard, 
-  TodaySchedule, 
+  ScheduleCalendar, 
   PatientList,
   PatientDetailsSheet,
   BookingDetailsSheet 
@@ -67,7 +66,7 @@ const PractitionerDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [activeTab, setActiveTab] = useState('today');
+  const [activeTab, setActiveTab] = useState('schedule');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -338,9 +337,9 @@ const PractitionerDashboard = () => {
             <div className="lg:col-span-2">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-2 mb-4">
-                  <TabsTrigger value="today" className="flex items-center gap-2">
-                    <CalendarDays className="w-4 h-4" />
-                    Today's Schedule
+                  <TabsTrigger value="schedule" className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Schedule
                   </TabsTrigger>
                   <TabsTrigger value="patients" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
@@ -348,9 +347,9 @@ const PractitionerDashboard = () => {
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="today" className="mt-0">
-                  <TodaySchedule
-                    bookings={todayBookings}
+                <TabsContent value="schedule" className="mt-0">
+                  <ScheduleCalendar
+                    bookings={bookings}
                     onComplete={(id) => updateBookingStatus(id, 'completed')}
                     onConfirm={(id) => updateBookingStatus(id, 'confirmed')}
                     onViewDetails={handleViewBookingDetails}
