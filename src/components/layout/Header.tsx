@@ -133,14 +133,9 @@ export function Header() {
               </DropdownMenu>
             </>
           ) : (
-            <>
-              <Button asChild variant="ghost" className="rounded-full">
-                <Link to="/auth">Login</Link>
-              </Button>
-              <Button asChild className="rounded-full shadow-warm">
-                <Link to="/auth?mode=signup">Sign Up</Link>
-              </Button>
-            </>
+            <Button asChild variant="ghost" className="rounded-full">
+              <Link to="/auth">Login</Link>
+            </Button>
           )}
         </div>
 
@@ -245,14 +240,9 @@ export function Header() {
                 </Button>
               </>
             ) : (
-              <>
-                <Button asChild variant="outline" className="w-full rounded-full">
-                  <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>Login</Link>
-                </Button>
-                <Button asChild className="w-full rounded-full shadow-warm">
-                  <Link to="/auth?mode=signup" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
-                </Button>
-              </>
+              <Button asChild variant="outline" className="w-full rounded-full">
+                <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              </Button>
             )}
           </div>
         </div>

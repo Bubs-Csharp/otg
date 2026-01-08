@@ -1,19 +1,41 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Check } from "lucide-react";
+import { MapPin, Check, Building2, Truck, Users } from "lucide-react";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/animated-section";
-import SouthAfricaMap from "@/assets/images/south-africa-map.svg";
+
+const coverageHighlights = [
+  {
+    icon: MapPin,
+    title: "All 9 Provinces",
+    description: "Complete coverage across South Africa, from urban centers to remote locations.",
+  },
+  {
+    icon: Building2,
+    title: "Corporate Sites",
+    description: "On-site services at offices, factories, and industrial facilities.",
+  },
+  {
+    icon: Truck,
+    title: "Mobile Clinics",
+    description: "Fully-equipped mobile units that come directly to your location.",
+  },
+  {
+    icon: Users,
+    title: "500+ Companies",
+    description: "Trusted by leading organizations across all industries.",
+  },
+];
 
 const provinces = [
-  { name: "Gauteng", active: true, cities: ["Johannesburg", "Pretoria", "Centurion"] },
-  { name: "Western Cape", active: true, cities: ["Cape Town", "Stellenbosch", "Paarl"] },
-  { name: "KwaZulu-Natal", active: true, cities: ["Durban", "Pietermaritzburg", "Richards Bay"] },
-  { name: "Eastern Cape", active: true, cities: ["Port Elizabeth", "East London"] },
-  { name: "Mpumalanga", active: true, cities: ["Nelspruit", "Witbank"] },
-  { name: "Limpopo", active: true, cities: ["Polokwane", "Tzaneen"] },
-  { name: "Free State", active: true, cities: ["Bloemfontein", "Welkom"] },
-  { name: "North West", active: true, cities: ["Rustenburg", "Potchefstroom"] },
-  { name: "Northern Cape", active: true, cities: ["Kimberley", "Upington"] },
+  "Gauteng",
+  "Western Cape", 
+  "KwaZulu-Natal",
+  "Eastern Cape",
+  "Mpumalanga",
+  "Limpopo",
+  "Free State",
+  "North West",
+  "Northern Cape",
 ];
 
 export function CoverageMap() {
@@ -30,86 +52,49 @@ export function CoverageMap() {
           </p>
         </AnimatedSection>
 
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
-          {/* Map Visualization */}
-          <AnimatedSection animation="scale-in" delay={100}>
-            <Card className="border-0 shadow-soft bg-card overflow-hidden">
+        {/* Coverage Highlights */}
+        <StaggeredContainer className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12" staggerDelay={100} animation="fade-up">
+          {coverageHighlights.map((highlight) => (
+            <Card key={highlight.title} className="border-0 shadow-soft bg-card hover-lift text-center">
               <CardContent className="p-6">
-                <div className="relative aspect-square flex items-center justify-center">
-                  <img 
-                    src={SouthAfricaMap} 
-                    alt="South Africa coverage map showing all 9 provinces" 
-                    className="w-full h-full object-contain [&_path]:fill-primary/60 [&_path]:stroke-background [&_path]:hover:fill-primary [&_path]:transition-colors"
-                    style={{
-                      filter: 'hue-rotate(140deg) saturate(0.8)'
-                    }}
-                  />
-                  {/* Pulsing indicators for major cities */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    {/* Gauteng - Johannesburg */}
-                    <div className="absolute top-[35%] left-[58%] w-4 h-4">
-                      <span className="absolute inset-0 rounded-full bg-coral animate-ping opacity-75"></span>
-                      <span className="relative block w-4 h-4 rounded-full bg-coral"></span>
-                    </div>
-                    {/* Western Cape - Cape Town */}
-                    <div className="absolute top-[75%] left-[22%] w-4 h-4">
-                      <span className="absolute inset-0 rounded-full bg-coral animate-ping opacity-75" style={{ animationDelay: '0.2s' }}></span>
-                      <span className="relative block w-4 h-4 rounded-full bg-coral"></span>
-                    </div>
-                    {/* KZN - Durban */}
-                    <div className="absolute top-[55%] left-[72%] w-4 h-4">
-                      <span className="absolute inset-0 rounded-full bg-coral animate-ping opacity-75" style={{ animationDelay: '0.4s' }}></span>
-                      <span className="relative block w-4 h-4 rounded-full bg-coral"></span>
-                    </div>
-                    {/* Limpopo */}
-                    <div className="absolute top-[18%] left-[60%] w-3 h-3">
-                      <span className="absolute inset-0 rounded-full bg-coral/80 animate-ping opacity-75" style={{ animationDelay: '0.6s' }}></span>
-                      <span className="relative block w-3 h-3 rounded-full bg-coral/80"></span>
-                    </div>
-                    {/* Mpumalanga */}
-                    <div className="absolute top-[30%] left-[70%] w-3 h-3">
-                      <span className="absolute inset-0 rounded-full bg-coral/80 animate-ping opacity-75" style={{ animationDelay: '0.8s' }}></span>
-                      <span className="relative block w-3 h-3 rounded-full bg-coral/80"></span>
-                    </div>
-                  </div>
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <highlight.icon className="h-7 w-7 text-primary" />
                 </div>
-                <div className="text-center mt-4">
-                  <p className="text-sm text-primary font-medium">
-                    <MapPin className="inline h-4 w-4 mr-1" />
-                    All 9 provinces covered
-                  </p>
-                </div>
+                <h3 className="font-display font-semibold text-lg text-foreground mb-2">
+                  {highlight.title}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {highlight.description}
+                </p>
               </CardContent>
             </Card>
-          </AnimatedSection>
+          ))}
+        </StaggeredContainer>
 
-          {/* Province List */}
-          <div className="space-y-4">
-            <AnimatedSection animation="fade-left">
-              <h3 className="font-display text-xl font-semibold text-foreground mb-6">
-                Service Areas by Province
-              </h3>
-            </AnimatedSection>
-            <StaggeredContainer className="grid gap-3" staggerDelay={50} animation="fade-left">
-              {provinces.map((province) => (
-                <Card key={province.name} className="border-0 shadow-soft bg-card hover-lift">
-                  <CardContent className="p-4 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Check className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-foreground">{province.name}</p>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {province.cities.join(" • ")}
-                      </p>
-                    </div>
-                    <Badge variant="secondary" className="flex-shrink-0">Active</Badge>
-                  </CardContent>
-                </Card>
-              ))}
-            </StaggeredContainer>
-          </div>
-        </div>
+        {/* Province Tags */}
+        <AnimatedSection animation="fade-up" delay={200}>
+          <Card className="border-0 shadow-soft bg-card">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center gap-2 mb-6">
+                <MapPin className="h-5 w-5 text-primary" />
+                <h3 className="font-display text-lg font-semibold text-foreground">
+                  Active in All Provinces
+                </h3>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                {provinces.map((province) => (
+                  <div
+                    key={province}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors"
+                  >
+                    <Check className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-foreground">{province}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </AnimatedSection>
       </div>
     </section>
   );
