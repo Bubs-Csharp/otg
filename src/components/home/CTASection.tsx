@@ -43,7 +43,7 @@ export function CTASection() {
               asChild
               size="lg" 
               variant="outline" 
-              className="rounded-full text-base px-8 border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 hover-scale"
+              className="rounded-full text-base px-8 border-white bg-white/10 text-white hover:bg-white/20 hover-scale"
             >
               <Link to="/contact">Contact Us</Link>
             </Button>
