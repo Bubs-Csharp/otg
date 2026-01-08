@@ -94,26 +94,28 @@ export function ServicesCarousel() {
             <CarouselContent className="-ml-4">
               {services.map((service, index) => (
                 <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                  <Card className="border-0 shadow-soft hover-lift bg-card group cursor-pointer h-full card-press">
-                    <CardContent className="p-6 flex flex-col h-full">
-                      <div className="w-12 h-12 rounded-xl bg-coral-light flex items-center justify-center mb-4 group-hover:bg-coral/20 transition-colors group-hover:scale-110 transform duration-300">
-                        <service.icon className="h-6 w-6 text-coral" />
-                      </div>
-                      <h3 className="font-display font-semibold text-lg text-foreground mb-2">
-                        {service.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-4 flex-1">
-                        {service.description}
-                      </p>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">{service.duration}</span>
-                          <span className="font-semibold text-primary">{service.price}</span>
+                  <Link to="/services" className="block h-full">
+                    <Card className="border-0 shadow-soft hover-lift bg-card group cursor-pointer h-full card-press">
+                      <CardContent className="p-6 flex flex-col h-full">
+                        <div className="w-12 h-12 rounded-xl bg-coral-light flex items-center justify-center mb-4 group-hover:bg-coral/20 transition-colors group-hover:scale-110 transform duration-300">
+                          <service.icon className="h-6 w-6 text-coral" />
                         </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </CardContent>
-                  </Card>
+                        <h3 className="font-display font-semibold text-lg text-foreground mb-2">
+                          {service.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-4 flex-1">
+                          {service.description}
+                        </p>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">{service.duration}</span>
+                            <span className="font-semibold text-primary">{service.price}</span>
+                          </div>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 </CarouselItem>
               ))}
             </CarouselContent>
